@@ -28,6 +28,7 @@ jobs:
       run: |
         echo "PR Number: $PR_NUMBER" > pr_info.txt
         echo "PR Title: $PR_TITLE" >> pr_info.txt
+        echo "Created at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> pr_info.txt
         echo "---" >> pr_info.txt
         git diff origin/main...HEAD >> pr_info.txt
 
