@@ -2,17 +2,18 @@
 
 ## Overview
 
-This GitHub Action automates the process of capturing pull request (PR) information and uploading it to a Google Cloud Platform (GCP) storage bucket. It's designed to run on every pull request to the `main` branch, creating a unique file containing PR metadata and the git diff, then uploading this file to a specified GCP bucket.
+This GitHub Action automates the process of capturing pull request (PR) information and uploading it to a Google Cloud Platform (GCP) storage bucket. It runs on every pull request to the `main` branch, creating a new file containing PR metadata and the git diff, then uploading this file to a specified GCP bucket.
 
 ## Features
 
 - Captures PR number and title
+- Records the creation timestamp
 - Includes the full git diff of the PR
-- Generates a unique filename for each upload, including:
+- Generates a unique filename for each PR, including:
   - PR number
   - Timestamp
   - Short Git SHA
-- Uploads the generated file to a specified GCP bucket
+- Uploads a new file to the specified GCP bucket for each PR
 
 ## Prerequisites
 
@@ -62,12 +63,13 @@ Create a new file in your repository at `.github/workflows/pr_process_upload.yml
 
 ## Usage
 
-Once set up, this action will run automatically on every pull request to the `main` branch. It will:
+Once set up, this action will run automatically on every pull request to the `main` branch. For each PR, it will:
 
 1. Capture the PR number and title
-2. Generate the git diff
-3. Create a file with this information
-4. Upload the file to your specified GCP bucket
+2. Record the creation timestamp
+3. Generate the git diff
+4. Create a new file with this information
+5. Upload the file to your specified GCP bucket
 
 The uploaded file will have a name in the format:
 
@@ -76,6 +78,8 @@ pr_info_PR<number>_<timestamp>_<short-sha>.txt
 ```
 
 For example: `pr_info_PR123_20230904_152045_a1b2c3d.txt`
+
+Each PR will create a new file in the bucket, allowing you to keep a history of all PRs.
 
 ## Customization
 
