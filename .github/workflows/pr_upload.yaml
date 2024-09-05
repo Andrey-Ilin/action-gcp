@@ -39,6 +39,8 @@ jobs:
     - name: Upload to GCP
       env:
         GCP_BUCKET: ${{ secrets.GCP_BUCKET_NAME }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        GITHUB_SHA: ${{ github.sha }}
       run: |
         from google.cloud import storage
         import os
@@ -51,7 +53,7 @@ jobs:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
         # Create unique filename with PR number, timestamp, and short SHA
-        destination_blob_name = f'pr_info_PR{os.environ["GITHUB_EVENT_NUMBER"]}_{timestamp}_{os.environ["GITHUB_SHA"][:7]}.txt'
+        destination_blob_name = f'pr_info_PR{os.environ["PR_NUMBER"]}_{timestamp}_{os.environ["GITHUB_SHA"][:7]}.txt'
 
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
