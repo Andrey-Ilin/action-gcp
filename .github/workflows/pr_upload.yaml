@@ -1,0 +1,63 @@
+name: Process PR and Upload to GCP
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  process-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install google-cloud-storage
+
+    - name: Process PR and create file
+      env:
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        PR_TITLE: ${{ github.event.pull_request.title }}
+      run: |
+        echo "PR Number: $PR_NUMBER" > pr_info.txt
+        echo "PR Title: $PR_TITLE" >> pr_info.txt
+        echo "---" >> pr_info.txt
+        git diff origin/main...HEAD >> pr_info.txt
+
+    - name: Authenticate to Google Cloud
+      uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+    - name: Upload to GCP
+      env:
+        GCP_BUCKET: ${{ secrets.GCP_BUCKET_NAME }}
+      run: |
+        from google.cloud import storage
+        import os
+        from datetime import datetime
+
+        bucket_name = os.environ['GCP_BUCKET']
+        source_file_name = 'pr_info.txt'
+        
+        # Generate timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        # Create unique filename with PR number, timestamp, and short SHA
+        destination_blob_name = f'pr_info_PR{os.environ["GITHUB_EVENT_NUMBER"]}_{timestamp}_{os.environ["GITHUB_SHA"][:7]}.txt'
+
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(destination_blob_name)
+
+        blob.upload_from_filename(source_file_name)
+
+        print(f"File {source_file_name} uploaded to {destination_blob_name}.")
+      shell: python
