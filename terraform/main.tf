@@ -155,3 +155,5 @@ output "vpc_id" {
   description = "ID of the created VPC"
   value       = aws_vpc.main.id
 }
+
+# My email andrii.ilin.dev@gmail.com and my phone +38(097)9610000
